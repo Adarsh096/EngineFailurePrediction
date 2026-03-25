@@ -5,6 +5,7 @@ import sklearn
 import os
 # for data preprocessing and pipeline creation
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 # for hugging face space authentication to upload files
 from huggingface_hub import login, HfApi
 
@@ -19,7 +20,8 @@ engine_dataset = pd.read_csv(DATASET_PATH)
 print("Dataset loaded successfully.")
 
 # removing spaces from column names and making all column names in lowercase:
-engine_dataset.columns = engine_dataset.columns.str.replace(' ', '_').str.lower()
+engine_dataset.columns = engine_dataset.columns.str.strip().str.replace(' ', '_').str.lower()
+print(f"Transformed columns: {engine_dataset.columns.tolist()}")
 #removing the duplicated rows
 engine_dataset.drop_duplicates(inplace=True)
 
