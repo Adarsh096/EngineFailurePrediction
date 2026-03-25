@@ -15,7 +15,7 @@ HUGGINGFACE_USER_NAME = os.getenv('HUGGINGFACE_USER_NAME')
 # Define constants for the dataset and output paths
 api = HfApi(token=os.getenv("HF_TOKEN"))
 DATASET_PATH = f"hf://datasets/{HUGGINGFACE_USER_NAME}/{HUGGINGFACE_DATASET_NAME}/engine_data.csv"
-engine_dataset = pd.read_csv(DATASET_PATH, index_col=0)
+engine_dataset = pd.read_csv(DATASET_PATH)
 print("Dataset loaded successfully.")
 
 # removing spaces from column names and making all column names in lowercase:
