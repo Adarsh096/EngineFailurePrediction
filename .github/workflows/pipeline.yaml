@@ -1,0 +1,66 @@
+name: Engine Failure Prediction Project Pipeline
+on:
+  push:
+    branches: [main]
+
+jobs:
+  register-dataset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: pip install -r engine_failure_prediction_project/requirements.txt
+      - name: Register Data
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HUGGINGFACE_DATASET_NAME: ${{vars.HUGGINGFACE_DATASET_NAME}}
+          HUGGINGFACE_USER_NAME: ${{vars.HUGGINGFACE_USER_NAME}}
+        run: python engine_failure_prediction_project/model_building/data_register.py
+
+  data-prep:
+    needs: register-dataset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: pip install -r engine_failure_prediction_project/requirements.txt
+      - name: Run Data Preparation
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HUGGINGFACE_DATASET_NAME: ${{vars.HUGGINGFACE_DATASET_NAME}}
+          HUGGINGFACE_USER_NAME: ${{vars.HUGGINGFACE_USER_NAME}}
+        run: python engine_failure_prediction_project/model_building/prep.py
+
+  model-training:
+    needs: [data-prep, register-dataset]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: pip install -r engine_failure_prediction_project/requirements.txt
+      - name: Train Model
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          MLFLOW_TRACKING_URL: ${{vars.MLFLOW_TRACKING_URL}}
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+          HUGGINGFACE_USER_NAME: ${{vars.HUGGINGFACE_USER_NAME}}
+          HUGGINGFACE_DATASET_NAME: ${{vars.HUGGINGFACE_DATASET_NAME}}
+          HUGGINGFACE_MODEL_NAME: ${{vars.HUGGINGFACE_MODEL_NAME}}
+        run: |
+          python engine_failure_prediction_project/model_building/train.py
+
+  deploy-hosting:
+    needs: model-training
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: pip install -r engine_failure_prediction_project/requirements.txt
+      - name: Push files to Frontend Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HUGGINGFACE_USER_NAME: ${{vars.HUGGINGFACE_USER_NAME}}
+          HUGGINGFACE_SPACE_NAME: ${{vars.HUGGINGFACE_SPACE_NAME}}
+          HUGGINGFACE_MODEL_NAME: ${{vars.HUGGINGFACE_MODEL_NAME}}
+        run: python engine_failure_prediction_project/hosting/hosting.py
