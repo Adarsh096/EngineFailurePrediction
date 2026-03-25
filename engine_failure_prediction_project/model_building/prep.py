@@ -59,8 +59,8 @@ Xtrain, Xtest, ytrain, ytest = train_test_split(
 scaler = StandardScaler()
 scaler.fit(Xtrain)
 # applying the scalar to train and test data:
-Xtrain_scaled = scaler.transform(Xtrain)
-Xtest_scaled = scaler.transform(Xtest)
+Xtrain_scaled = pd.DataFrame(scaler.fit_transform(Xtrain), columns=Xtrain.columns)
+Xtest_scaled = pd.DataFrame(scaler.transform(Xtest), columns=Xtest.columns)
 
 Xtrain_scaled.to_csv("Xtrain.csv",index=False)
 Xtest_scaled.to_csv("Xtest.csv",index=False)
