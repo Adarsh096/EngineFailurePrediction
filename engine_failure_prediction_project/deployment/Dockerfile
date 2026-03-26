@@ -1,5 +1,8 @@
-# Use a minimal base image with Python 3.9 installed
-FROM python:3.9-slim
+# Use a minimal base image with Python 3.10 installed
+FROM python:3.10-slim
+
+#Install neccesary libraries:
+RUN apt-get update && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container to /app
 WORKDIR /app
@@ -23,5 +26,8 @@ WORKDIR $HOME/app
 
 COPY --chown=user . $HOME/app
 
+# Expose container port for Streamlit:
+EXPOSE 7860
+
 # Define the command to run the Streamlit app on port "7860" and make it accessible externally
-CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0", "--server.enableXsrfProtection=false"]
+CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0", "--server.enableXsrfProtection=false", "--gatherUsageStats=false"]

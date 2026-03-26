@@ -4,6 +4,9 @@ from huggingface_hub import hf_hub_download
 import joblib
 import os
 
+# To ensure app starts loading quickly we set the title first:
+st.set_page_config(page_title="Engine Failure Prediction", layout="centered")
+
 # Common constants
 HUGGINGFACE_USER_NAME = os.getenv('HUGGINGFACE_USER_NAME')
 HUGGINGFACE_MODEL_NAME = os.getenv('HUGGINGFACE_MODEL_NAME')
@@ -19,13 +22,10 @@ def load_remote_model():
         )
         return joblib.load(model_path)
     except Exception as e:
-        st.error(f"Error loading model from Hugging Face: {e}")
-        st.stop()
-
-model = load_remote_model()
+        print(f"Error loading model: {e}")
+        return e
 
 # Streamlit UI Setup
-st.set_page_config(page_title="Engine Failure Prediction", layout="centered")
 st.title("Engine Failure Prediction")
 st.write("""
 This tool predicts engine health based on real-time telemetry.
@@ -61,12 +61,15 @@ input_dict = {
 input_data = pd.DataFrame([input_dict])
 
 # Prediction Logic
-# We use 0.45 to be slightly more sensitive to failures (maximizing Recall)
-classification_threshold = 0.45
+# We use 0.5 but a lower value could be slightly more sensitive to failures (maximizing Recall)
+classification_threshold = 0.5
 
 st.divider()
 
 if st.button("Generate Prediction", type="primary"):
+    # loading the model(it will be cached so only first time it will actually download)
+    model = load_remote_model()
+
     # The 'model' here is the Scikit-Learn Pipeline
     # It automatically runs the StandardScaler on input_data before passing to XGBoost
     prediction_proba = model.predict_proba(input_data)[0, 1]
