@@ -76,7 +76,7 @@ if st.button("Generate Prediction", type="primary"):
 
     # Apply custom threshold
     prediction = 1 if prediction_proba >= classification_threshold else 0
-
+    # using markdown heading syntax (###) to adjust font size on the UI:
     if prediction == 1:
         st.error(f"### ⚠️ CRITICAL: Engine Failure Likely\n**Probability of Failure:** {prediction_proba:.2%}")
         st.write("Immediate maintenance inspection recommended to avoid service disruption.")
